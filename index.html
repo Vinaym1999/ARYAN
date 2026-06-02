@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday, ARYAN! 🎉</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+   
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Quicksand:wght@400;600;700&display=swap');
+        
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: linear-gradient(135deg, #fef08a 0%, #fbcfe8 50%, #c084fc 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .fancy-title {
+            font-family: 'Fredoka One', cursive;
+        }
+
+        
+        .balloon {
+            position: absolute;
+            bottom: -150px;
+            width: 60px;
+            height: 75px;
+            border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+            cursor: pointer;
+            transition: transform 0.2s ease-out;
+            z-index: 10;
+        }
+        .balloon::after {
+            content: "";
+            position: absolute;
+            bottom: -8px;
+            left: 26px;
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+        }
+        .balloon-string {
+            position: absolute;
+            bottom: -30px;
+            left: 29px;
+            width: 2px;
+            height: 30px;
+            background-color: rgba(0,0,0,0.2);
+        }
+
+        
+        @keyframes floatUp {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-110vh) rotate(360deg);
+                opacity: 0.8;
+            }
+        }
+
+        
+        @keyframes flicker {
+            0%, 100% { transform: scale(1) rotate(-2deg); filter: drop-shadow(0 0 4px #f59e0b); }
+            50% { transform: scale(1.1) rotate(3deg); filter: drop-shadow(0 0 10px #ef4444); }
+        }
+        .flame {
+            animation: flicker 0.6s infinite alternate;
+        }
+
+        
+        @keyframes softPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        .pulse-btn {
+            animation: softPulse 2s infinite;
+        }
+
+        
+        .gift-lid {
+            transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform-origin: top;
+        }
+        .gift-box:hover .gift-lid {
+            transform: translateY(-25px) rotate(-5deg);
+        }
+        .gift-box.open .gift-lid {
+            transform: translateY(-150px) rotate(-25deg) scale(0);
+            opacity: 0;
+        }
+        .gift-box.open .gift-body {
+            transform: scale(0.9);
+            opacity: 0.3;
+            filter: blur(2px);
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0; transform: scale(0.5) rotate(0deg); }
+            50% { opacity: 1; transform: scale(1.2) rotate(180deg); }
+        }
+        .css-sparkle {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            background: radial-gradient(circle, #fff 10%, transparent 60%);
+            background-color: #fde047;
+            clip-path: polygon(50% 0%, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0% 50%, 40% 40%);
+            animation: twinkle 2s infinite ease-in-out;
+            z-index: 10;
+            pointer-events: none;
+        }
+        .sparkle-1 { top: -20px; left: -30px; animation-delay: 0s; }
+        .sparkle-2 { top: 30px; right: -40px; animation-delay: 0.7s; }
+        .sparkle-3 { bottom: -10px; left: 50%; animation-delay: 1.4s; }
+        .sparkle-4 { top: -10px; right: 20%; animation-delay: 1.1s; }
+    </style>
+</head>
+<body class="relative pb-12">
+
+    <!-- Audio toggle & Sound Elements -->
+    <div class="fixed top-4 right-4 z-50 flex space-x-2">
+        <button id="musicBtn" onclick="toggleMusic()" class="bg-white/80 backdrop-blur text-purple-600 p-3 rounded-full shadow-lg hover:bg-white hover:scale-110 active:scale-95 transition flex items-center justify-center w-12 h-12">
+            <i id="musicIcon" class="fa-solid fa-music text-xl"></i>
+        </button>
+        <button id="confettiBtn" onclick="shootHugeConfetti()" class="bg-white/80 backdrop-blur text-pink-600 p-3 rounded-full shadow-lg hover:bg-white hover:scale-110 active:scale-95 transition flex items-center justify-center w-12 h-12">
+            <i class="fa-solid fa-wand-magic-sparkles text-xl animate-bounce"></i>
+        </button>
+    </div>
+
+    <!-- Floating Balloons Container -->
+    <div id="balloon-container" class="fixed inset-0 pointer-events-none z-10 overflow-hidden"></div>
+
+    <!-- Celebration Header Hero -->
+    <section class="max-w-4xl mx-auto px-4 pt-16 pb-8 text-center relative z-20">
+        <div class="animate-bounce inline-block bg-white/40 backdrop-blur px-6 py-2 rounded-full text-purple-800 font-bold text-sm tracking-wide mb-6 uppercase shadow-sm">
+            🎈 Best Brother in the Universe Award 🎈
+        </div>
+        
+        <div class="relative inline-block">
+            <div class="css-sparkle sparkle-1"></div>
+            <div class="css-sparkle sparkle-2"></div>
+            <div class="css-sparkle sparkle-3"></div>
+            <div class="css-sparkle sparkle-4"></div>
+            <h1 class="fancy-title text-5xl md:text-7xl text-purple-900 drop-shadow-md mb-2 relative z-10">
+                Happy Birthday, <span class="text-transparent bg-clip-text bg-gradient-to-r from-pink-600 to-purple-600">ARYAN VENKATESH</span>!
+            </h1>
+        </div>
+        
+        <p class="text-lg md:text-2xl text-purple-800/80 max-w-xl mx-auto font-medium mb-8 mt-4">
+            Today is all about you! Let's celebrate the coolest, funniest, and most supportive brother on the planet! 🎉
+        </p>
+    </section>
+
+    
+    <main class="max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-8 relative z-20">
+        
+        
+        <div class="bg-white/70 backdrop-blur-md rounded-3xl p-6 shadow-xl border border-white/40 flex flex-col items-center justify-center text-center">
+            <h2 class="fancy-title text-2xl text-purple-900 mb-2">🎂 Make a Wish!</h2>
+            <p class="text-sm text-purple-700/80 mb-6">Click/tap on the candles to blow them out and trigger a surprise!</p>
+            
+            
+            <div class="relative w-64 h-64 flex items-end justify-center mb-6">
+                
+                <div class="w-full relative flex flex-col items-center">
+                    
+                
+                    <div class="flex space-x-8 -mb-1 z-30">
+                        
+                        <div id="candle-1" onclick="blowCandle(1)" class="relative w-4 h-16 bg-gradient-to-t from-pink-400 to-pink-300 rounded-t cursor-pointer transform hover:scale-110 transition">
+                            <div class="absolute -top-3 left-1/2 -translate-x-1/2 w-1.5 h-4 bg-gray-400 rounded-full"></div>
+                            <!-- Flame -->
+                            <div id="flame-1" class="flame absolute -top-8 left-1/2 -translate-x-1/2 w-5 h-8 bg-gradient-to-b from-yellow-300 via-orange-500 to-red-600 rounded-full opacity-100 transition-opacity duration-300"></div>
+                        </div>
+                        <!-- Candle 2 -->
+                        <div id="candle-2" onclick="blowCandle(2)" class="relative w-4 h-18 bg-gradient-to-t from-yellow-400 to-yellow-300 rounded-t cursor-pointer transform hover:scale-110 transition">
+                            <div class="absolute -top-3 left-1/2 -translate-x-1/2 w-1.5 h-4 bg-gray-400 rounded-full"></div>
+                            <!-- Flame -->
+                            <div id="flame-2" class="flame absolute -top-8 left-1/2 -translate-x-1/2 w-5 h-8 bg-gradient-to-b from-yellow-300 via-orange-500 to-red-600 rounded-full opacity-100 transition-opacity duration-300"></div>
+                        </div>
+                        <!-- Candle 3 -->
+                        <div id="candle-3" onclick="blowCandle(3)" class="relative w-4 h-16 bg-gradient-to-t from-blue-400 to-blue-300 rounded-t cursor-pointer transform hover:scale-110 transition">
+                            <div class="absolute -top-3 left-1/2 -translate-x-1/2 w-1.5 h-4 bg-gray-400 rounded-full"></div>
+                            <!-- Flame -->
+                            <div id="flame-3" class="flame absolute -top-8 left-1/2 -translate-x-1/2 w-5 h-8 bg-gradient-to-b from-yellow-300 via-orange-500 to-red-600 rounded-full opacity-100 transition-opacity duration-300"></div>
+                        </div>
+                    </div>
+
+                    <!-- Top Cake Layer -->
+                    <div class="w-40 h-16 bg-pink-100 rounded-t-2xl border-b-8 border-pink-200 shadow-inner z-20 relative flex items-center justify-around px-2">
+                        <!-- Cream drips -->
+                        <div class="absolute -bottom-4 left-4 w-6 h-6 bg-pink-200 rounded-full"></div>
+                        <div class="absolute -bottom-3 left-16 w-5 h-5 bg-pink-200 rounded-full"></div>
+                        <div class="absolute -bottom-5 right-8 w-6 h-6 bg-pink-200 rounded-full"></div>
+                        <!-- Topping Strawberries (SVGs) -->
+                        <div class="text-xl">🍓</div>
+                        <div class="text-xl">🍓</div>
+                        <div class="text-xl">🍓</div>
+                    </div>
+
+                    <!-- Bottom Cake Layer -->
+                    <div class="w-56 h-20 bg-purple-100 rounded-t-2xl border-b-8 border-purple-200 shadow z-10 relative flex items-center justify-around px-4">
+                        <!-- Cream drips -->
+                        <div class="absolute -bottom-4 left-6 w-8 h-8 bg-purple-200 rounded-full"></div>
+                        <div class="absolute -bottom-5 right-12 w-6 h-6 bg-purple-200 rounded-full"></div>
+                        <!-- Cake frosting designs -->
+                        <div class="w-3 h-3 bg-yellow-300 rounded-full"></div>
+                        <div class="w-3 h-3 bg-pink-400 rounded-full"></div>
+                        <div class="w-3 h-3 bg-blue-400 rounded-full"></div>
+                        <div class="w-3 h-3 bg-green-300 rounded-full"></div>
+                        <div class="w-3 h-3 bg-yellow-300 rounded-full"></div>
+                    </div>
+
+                    <!-- Serving Plate -->
+                    <div class="w-64 h-4 bg-white rounded-full shadow-md z-0"></div>
+                </div>
+            </div>
+
+            <!-- Cake Interactive Control Panel -->
+            <div class="w-full space-y-3">
+                <button id="relightBtn" onclick="relightCandles()" class="hidden mx-auto bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-6 rounded-full shadow-md transform hover:scale-105 active:scale-95 transition-all flex items-center space-x-2">
+                    <i class="fa-solid fa-fire-burner"></i>
+                    <span>Relight Candles</span>
+                </button>
+                <div class="flex justify-center space-x-2">
+                    <button id="playMelodyBtn" onclick="playBirthdayMelody()" class="pulse-btn bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transform hover:scale-105 active:scale-95 transition-all flex items-center space-x-2">
+                        <i class="fa-solid fa-play"></i>
+                        <span>Play Synth Birthday Song!</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Interactive Unwrapping Gift Box -->
+        <div class="bg-white/70 backdrop-blur-md rounded-3xl p-6 shadow-xl border border-white/40 flex flex-col items-center justify-center text-center min-h-[400px]">
+            <h2 class="fancy-title text-2xl text-purple-900 mb-2">🎁 Tap to Uncover Your Gift!</h2>
+            <p class="text-sm text-purple-700/80 mb-6">Open the magical box to read a custom surprise card for As.</p>
+
+            <!-- Gift Unwrapping Area -->
+            <div id="giftContainer" class="relative w-full flex flex-col items-center justify-center flex-grow transition-all duration-500">
+                
+                <!-- Interactive Box Graphic -->
+                <div id="giftBox" onclick="openGift()" class="gift-box cursor-pointer relative w-48 h-48 flex flex-col items-center justify-end z-20">
+                    
+                    <!-- Bow on top -->
+                    <div class="gift-lid absolute top-4 w-52 h-10 bg-red-500 rounded shadow-md flex justify-center items-center z-40">
+                        <div class="absolute -top-6 w-12 h-8 bg-red-600 rounded-full border-4 border-red-400 rotate-12"></div>
+                        <div class="absolute -top-6 w-12 h-8 bg-red-600 rounded-full border-4 border-red-400 -rotate-12"></div>
+                        <div class="w-8 h-full bg-yellow-400"></div>
+                    </div>
+
+                    <!-- Main body of box -->
+                    <div class="gift-body w-48 h-36 bg-red-600 rounded-b-lg shadow-lg flex justify-center z-30 relative">
+                        <div class="w-8 h-full bg-yellow-400"></div>
+                        <!-- Ribbon Horizontal -->
+                        <div class="absolute top-1/2 -translate-y-1/2 w-full h-8 bg-yellow-400"></div>
+                    </div>
+                </div>
+
+                <!-- Hidden Card details (Fades and grows when Gift opens) -->
+                <div id="surpriseCard" class="hidden opacity-0 scale-75 transform transition-all duration-700 w-full bg-gradient-to-br from-pink-50 to-purple-50 rounded-2xl p-6 border-2 border-purple-200 shadow-inner text-left relative">
+                    <div class="absolute -top-3 -right-3 text-4xl animate-bounce">💌</div>
+                    
+                    <h3 class="fancy-title text-xl text-purple-900 border-b-2 border-purple-200 pb-2 mb-4">To My Brother, As:</h3>
+                    
+                    <div class="space-y-4 text-purple-800 text-sm md:text-base leading-relaxed">
+                        <p class="italic">"A brother is a sibling, a lifelong best friend, and a built-in partner-in-crime."</p>
+                        <p>Through all the crazy phases, epic laughter, and dumb arguments, you've always been the most stellar brother I could have ever asked for. Having you around makes life a million times more interesting and fun!</p>
+                        <p class="font-bold text-pink-600 text-center text-lg">May your year ahead be packed with endless successes, epic gaming/adventures, joy, and peace!</p>
+                    </div>
+
+                    <div class="mt-6 flex flex-col sm:flex-row gap-3">
+                        <button onclick="changeCardMessage()" class="flex-1 bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded-xl shadow text-center text-sm transition-all transform hover:scale-102">
+                            ✨ Swap Brother Quotes
+                        </button>
+                        <button onclick="closeGift()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-xl text-center text-sm transition-all">
+                            Close Card
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Balloon Pop Mini-Game Panel -->
+    <section class="max-w-4xl mx-auto px-4 mt-12 relative z-20">
+        <div class="bg-white/70 backdrop-blur-md rounded-3xl p-6 shadow-xl border border-white/40 text-center">
+            <h2 class="fancy-title text-2xl text-purple-900 mb-1">🎈 Balloon Pop Party!</h2>
+            <p class="text-sm text-purple-700/80 mb-4">Pop floating balloons for satisfying sound chimes and fireworks!</p>
+            
+            <div class="flex justify-center items-center space-x-6 mb-4">
+                <div class="bg-purple-100 px-4 py-2 rounded-full border border-purple-200">
+                    <span class="text-purple-800 font-semibold text-sm">Balloons Popped: </span>
+                    <span id="popScore" class="font-bold text-purple-900 text-lg">0</span>
+                </div>
+                <button onclick="spawnBalloonBatch()" class="bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600 text-white font-bold py-2 px-6 rounded-full shadow transform active:scale-95 transition flex items-center space-x-2">
+                    <i class="fa-solid fa-wind"></i>
+                    <span>Release Balloons!</span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Photo Wall / Warm Messages Carousel Section -->
+    <section class="max-w-4xl mx-auto px-4 mt-12 relative z-20">
+        <div class="bg-white/70 backdrop-blur-md rounded-3xl p-6 shadow-xl border border-white/40">
+            <h2 class="fancy-title text-3xl text-center text-purple-900 mb-6">💖 Custom Wishes for As</h2>
+            
+            <!-- Cards Slider Container -->
+            <div class="relative overflow-hidden min-h-[180px]">
+                <!-- Card 1 -->
+                <div id="wish-card-0" class="wish-slide transition-all duration-500 flex flex-col items-center justify-center text-center p-4">
+                    <i class="fa-solid fa-quote-left text-4xl text-purple-300 mb-2"></i>
+                    <p class="text-lg md:text-xl text-purple-800 font-medium max-w-xl italic">
+                        "Happy Birthday, As! Thanks for always being my biggest champion, the voice of sanity (sometimes!), and the best co-pilot on this wild ride called life."
+                    </p>
+                </div>
+                <!-- Card 2 -->
+                <div id="wish-card-1" class="wish-slide hidden transition-all duration-500 flex flex-col items-center justify-center text-center p-4">
+                    <i class="fa-solid fa-quote-left text-4xl text-pink-300 mb-2"></i>
+                    <p class="text-lg md:text-xl text-purple-800 font-medium max-w-xl italic">
+                        "Wishing the happiest of birthdays to my phenomenal brother As! May you smash every single goal you have set for this year. Keep shining, brother!"
+                    </p>
+                </div>
+                <!-- Card 3 -->
+                <div id="wish-card-2" class="wish-slide hidden transition-all duration-500 flex flex-col items-center justify-center text-center p-4">
+                    <i class="fa-solid fa-quote-left text-4xl text-blue-300 mb-2"></i>
+                    <p class="text-lg md:text-xl text-purple-800 font-medium max-w-xl italic">
+                        "As, thanks for being the brother who always gives the best advice, plays the best games, and knows exactly how to make me laugh. Have an awesome birthday!"
+                    </p>
+                </div>
+            </div>
+
+            <!-- Slider controls -->
+            <div class="flex justify-center items-center space-x-4 mt-4">
+                <button onclick="prevWish()" class="p-2 bg-purple-100 hover:bg-purple-200 text-purple-800 rounded-full transition w-10 h-10 flex items-center justify-center">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </button>
+                <div class="flex space-x-1" id="dots-container">
+                    <!-- Dots inserted by JS -->
+                </div>
+                <button onclick="nextWish()" class="p-2 bg-purple-100 hover:bg-purple-200 text-purple-800 rounded-full transition w-10 h-10 flex items-center justify-center">
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <section class="max-w-5xl mx-auto px-4 mt-12 relative z-20">
+        <div class="bg-white/70 backdrop-blur-md rounded-3xl p-6 shadow-xl border border-white/40">
+            <h2 class="fancy-title text-3xl text-center text-purple-900 mb-2">📸 Memory Lane</h2>
+            <p class="text-sm text-center text-purple-700/80 mb-6">A few of our favorite moments together!</p>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 auto-rows-[150px] md:auto-rows-[200px]">
+                <!-- Photo 1 (Hero Memory - Large) -->
+                <div class="col-span-2 row-span-2 overflow-hidden rounded-2xl shadow-md group relative border-2 border-white/50">
+                    <div class="absolute inset-0 bg-purple-900/10 group-hover:bg-transparent transition duration-300 z-10"></div>
+                    <!-- ⬇️ PASTE YOUR PHOTO URL HERE inside the src="" quotes ⬇️ -->
+                    <img src=7.jpeg alt="Memory 1" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700">
+                </div>
+                <!-- Photo 2 -->
+                <div class="col-span-1 row-span-1 overflow-hidden rounded-2xl shadow-md group relative border-2 border-white/50">
+                    <!-- ⬇️ PASTE YOUR PHOTO URL HERE inside the src="" quotes ⬇️ -->
+                    <img src=5.jpeg alt="Memory 2" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700">
+                </div>
+                <!-- Photo 3 -->
+                <div class="col-span-1 row-span-1 overflow-hidden rounded-2xl shadow-md group relative border-2 border-white/50">
+                    <!-- ⬇️ PASTE YOUR PHOTO URL HERE inside the src="" quotes ⬇️ -->
+                    <img src=4.jpeg alt="Memory 3" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700">
+                </div>
+                <!-- Photo 4 -->
+                <div class="col-span-1 row-span-1 overflow-hidden rounded-2xl shadow-md group relative border-2 border-white/50">
+                    <!-- ⬇️ PASTE YOUR PHOTO URL HERE inside the src="" quotes ⬇️ -->
+                    <img src=6.jpeg alt="Memory 4" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700">
+                </div>
+                <!-- Photo 5 -->
+                <div class="col-span-1 row-span-1 overflow-hidden rounded-2xl shadow-md group relative border-2 border-white/50">
+                    <!-- ⬇️ PASTE YOUR PHOTO URL HERE inside the src="" quotes ⬇️ -->
+                    <img src=3.jpeg alt="Memory 5" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Custom Wishes Editor Panel -->
+    <section class="max-w-4xl mx-auto px-4 mt-12 relative z-20">
+        <div class="bg-white/70 backdrop-blur-md rounded-3xl p-6 shadow-xl border border-white/40">
+            <h2 class="fancy-title text-2xl text-center text-purple-900 mb-2">✍️ Write Your Own Wish</h2>
+            <p class="text-sm text-center text-purple-700/80 mb-6">Type a personal message, and we'll instantly render a celebration poster for As!</p>
+            
+            <div class="space-y-4">
+                <textarea id="customWishText" rows="3" placeholder="Enter your custom message to As here..." class="w-full p-4 rounded-xl border border-purple-200 focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white/60 text-purple-900 font-medium"></textarea>
+                
+                <div class="flex justify-center">
+                    <button onclick="renderCustomWish()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transform active:scale-95 transition-all flex items-center space-x-2">
+                        <i class="fa-solid fa-file-signature"></i>
+                        <span>Generate Poster</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Custom Poster Display Area -->
+            <div id="posterBox" class="hidden mt-8 p-6 bg-gradient-to-tr from-yellow-100 via-pink-100 to-purple-100 rounded-2xl border-4 border-dashed border-purple-400 text-center relative overflow-hidden">
+                <div class="absolute inset-0 bg-white/20 backdrop-blur-[2px]"></div>
+                <div class="relative z-10">
+                    <div class="text-4xl mb-2">✨ 🎉 ✨</div>
+                    <h3 class="fancy-title text-2xl text-purple-900 mb-4">CELEBRATING AS!</h3>
+                    <p id="posterWishContent" class="text-lg md:text-xl text-purple-800 font-bold max-w-xl mx-auto leading-relaxed"></p>
+                    <div class="mt-4 text-xs text-purple-600/60 uppercase tracking-widest font-semibold">- Handcrafted with Love -</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="text-center mt-12 relative z-20 text-purple-900/60 text-sm">
+        <p>Made with 💖 to wish As the best Birthday ever!</p>
+        <p class="mt-1">&copy; 2026 Celebration Portal</p>
+    </footer>
+
+    <!-- Audio Synthesis Script and Page Functionality -->
+    <script>
+        // Explicit non-worker confetti setup to bypass sandbox iframe restrictions
+        let myConfetti = function() {}; 
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const canvas = document.createElement('canvas');
+            canvas.id = 'celebration-confetti-canvas';
+            canvas.style.position = 'fixed';
+            canvas.style.top = '0px';
+            canvas.style.left = '0px';
+            canvas.style.width = '100vw';
+            canvas.style.height = '100vh';
+            canvas.style.pointerEvents = 'none';
+            canvas.style.zIndex = '9999';
+            document.body.appendChild(canvas);
+            
+            // Forcing useWorker to false prevents the iframe blob error!
+            myConfetti = confetti.create(canvas, {
+                resize: true,
+                useWorker: false
+            });
+        });
+
+        // Sound System (using Web Audio API so it's fully standalone)
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let isMusicPlaying = false;
+        let melodyTimeout = null;
+
+        // Custom melody synthesizer
+        const melody = [
+            { note: "C4", duration: 0.3 },
+            { note: "C4", duration: 0.1 },
+            { note: "D4", duration: 0.4 },
+            { note: "C4", duration: 0.4 },
+            { note: "F4", duration: 0.4 },
+            { note: "E4", duration: 0.8 },
+            
+            { note: "C4", duration: 0.3 },
+            { note: "C4", duration: 0.1 },
+            { note: "D4", duration: 0.4 },
+            { note: "C4", duration: 0.4 },
+            { note: "G4", duration: 0.4 },
+            { note: "F4", duration: 0.8 },
+            
+            { note: "C4", duration: 0.3 },
+            { note: "C4", duration: 0.1 },
+            { note: "C5", duration: 0.4 },
+            { note: "A4", duration: 0.4 },
+            { note: "F4", duration: 0.4 },
+            { note: "E4", duration: 0.4 },
+            { note: "D4", duration: 0.8 },
+            
+            { note: "A#4", duration: 0.3 },
+            { note: "A#4", duration: 0.1 },
+            { note: "A4", duration: 0.4 },
+            { note: "F4", duration: 0.4 },
+            { note: "G4", duration: 0.4 },
+            { note: "F4", duration: 0.8 },
+        ];
+
+        const noteFreqs = {
+            "C4": 261.63, "D4": 293.66, "E4": 329.63, "F4": 349.23, "G4": 392.00,
+            "A4": 440.00, "A#4": 466.16, "B4": 493.88, "C5": 523.25
+        };
+
+        function playTone(freq, duration, type = "sine") {
+            if (audioCtx.state === "suspended") {
+                audioCtx.resume();
+            }
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            
+            gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime);
+            // Exponential decay
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+            
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        }
+
+        function playBirthdayMelody() {
+            // Stop any ongoing melodies
+            clearTimeout(melodyTimeout);
+            let index = 0;
+            
+            function playNext() {
+                if (index < melody.length) {
+                    const item = melody[index];
+                    const freq = noteFreqs[item.note];
+                    playTone(freq, item.duration * 2, "triangle");
+                    index++;
+                    melodyTimeout = setTimeout(playNext, item.duration * 800);
+                }
+            }
+            playNext();
+            shootConfettiShower();
+        }
+
+        function playPopSound() {
+            playTone(800, 0.1, "sine");
+            playTone(1500, 0.05, "triangle");
+        }
+
+        function toggleMusic() {
+            const icon = document.getElementById('musicIcon');
+            if (!isMusicPlaying) {
+                playBirthdayMelody();
+                icon.classList.remove('fa-music');
+                icon.classList.add('fa-volume-xmark');
+                isMusicPlaying = true;
+            } else {
+                clearTimeout(melodyTimeout);
+                icon.classList.remove('fa-volume-xmark');
+                icon.classList.add('fa-music');
+                isMusicPlaying = false;
+            }
+        }
+
+        // Confetti Effects
+        function shootHugeConfetti() {
+            myConfetti({
+                particleCount: 150,
+                spread: 80,
+                origin: { y: 0.6 }
+            });
+        }
+
+        function shootConfettiShower() {
+            const duration = 2 * 1000;
+            const end = Date.now() + duration;
+
+            (function frame() {
+                myConfetti({
+                    particleCount: 3,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0 }
+                });
+                myConfetti({
+                    particleCount: 3,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1 }
+                });
+
+                if (Date.now() < end) {
+                    requestAnimationFrame(frame);
+                }
+            }());
+        }
+
+        // Interactive Cake Logic
+        let blownCandlesCount = 0;
+        function blowCandle(id) {
+            const flame = document.getElementById(`flame-${id}`);
+            if (flame.style.opacity !== "0") {
+                flame.style.opacity = "0";
+                playTone(300, 0.1, "sine"); // tiny gust sound
+                blownCandlesCount++;
+
+                // Sparkle at candle location
+                const rect = flame.getBoundingClientRect();
+                myConfetti({
+                    particleCount: 10,
+                    origin: { x: rect.left / window.innerWidth, y: rect.top / window.innerHeight }
+                });
+
+                if (blownCandlesCount === 3) {
+                    setTimeout(() => {
+                        shootHugeConfetti();
+                        // Play cheerful victory melody
+                        setTimeout(() => {
+                            playTone(523.25, 0.2); // C5
+                            setTimeout(() => playTone(659.25, 0.2), 150); // E5
+                            setTimeout(() => playTone(783.99, 0.4), 300); // G5
+                        }, 200);
+                        document.getElementById('relightBtn').classList.remove('hidden');
+                    }, 400);
+                }
+            }
+        }
+
+        function relightCandles() {
+            blownCandlesCount = 0;
+            for (let i = 1; i <= 3; i++) {
+                document.getElementById(`flame-${i}`).style.opacity = "1";
+            }
+            document.getElementById('relightBtn').classList.add('hidden');
+        }
+
+        // Gift Unwrapping logic
+        function openGift() {
+            const giftBox = document.getElementById('giftBox');
+            const surpriseCard = document.getElementById('surpriseCard');
+            
+            giftBox.classList.add('open');
+            playTone(400, 0.3, "triangle");
+            
+            setTimeout(() => {
+                giftBox.classList.add('hidden');
+                surpriseCard.classList.remove('hidden');
+                setTimeout(() => {
+                    surpriseCard.classList.remove('opacity-0', 'scale-75');
+                    surpriseCard.classList.add('opacity-100', 'scale-100');
+                    shootHugeConfetti();
+                }, 50);
+            }, 600);
+        }
+
+        function closeGift() {
+            const giftBox = document.getElementById('giftBox');
+            const surpriseCard = document.getElementById('surpriseCard');
+            
+            surpriseCard.classList.remove('opacity-100', 'scale-100');
+            surpriseCard.classList.add('opacity-0', 'scale-75');
+            
+            setTimeout(() => {
+                surpriseCard.classList.add('hidden');
+                giftBox.classList.remove('hidden', 'open');
+            }, 400);
+        }
+
+        // Custom Sibling Messages / Quote Swapper
+        const brotherQuotes = [
+            "A brother is a sibling, a lifelong best friend, and a built-in partner-in-crime.",
+            "Brothers aren't just family; they are friends who know your secret handshake and share your worst haircuts.",
+            "There is no love like the love for a brother. There is no love like the love from a brother.",
+            "Having a brother means you always have a second wardrobe, a sparring partner, and a shield in hard times.",
+            "Because I have a brother, I'll always have a friend."
+        ];
+        let quoteIndex = 0;
+        function changeCardMessage() {
+            quoteIndex = (quoteIndex + 1) % brotherQuotes.length;
+            const quoteText = document.querySelector('#surpriseCard p.italic');
+            quoteText.textContent = `"${brotherQuotes[quoteIndex]}"`;
+            playTone(600, 0.1, "sine");
+        }
+
+        // Floating Balloon pop game
+        let popScore = 0;
+        const colors = [
+            'from-pink-500 to-rose-400',
+            'from-purple-500 to-indigo-400',
+            'from-blue-500 to-cyan-400',
+            'from-emerald-500 to-teal-400',
+            'from-amber-500 to-yellow-400',
+            'from-red-500 to-orange-400'
+        ];
+
+        function createBalloon() {
+            const container = document.getElementById('balloon-container');
+            const balloon = document.createElement('div');
+            const string = document.createElement('div');
+            
+            // Random properties
+            const colorClass = colors[Math.floor(Math.random() * colors.length)];
+            const leftPos = Math.random() * 85 + 5; // percentage
+            const sizeMultiplier = 0.8 + Math.random() * 0.4; // sizing variant
+            const animationDuration = 5 + Math.random() * 5; // seconds
+            
+            balloon.className = `balloon bg-gradient-to-t ${colorClass}`;
+            balloon.style.left = `${leftPos}%`;
+            balloon.style.transform = `scale(${sizeMultiplier})`;
+            balloon.style.animation = `floatUp ${animationDuration}s linear forwards`;
+            
+            string.className = 'balloon-string';
+            balloon.appendChild(string);
+            
+            // Interaction: popping on tap/click
+            balloon.addEventListener('pointerdown', (e) => {
+                e.stopPropagation();
+                playPopSound();
+                
+                // Pop physics confetti spark
+                const rect = balloon.getBoundingClientRect();
+                myConfetti({
+                    particleCount: 15,
+                    spread: 360,
+                    startVelocity: 15,
+                    origin: { x: rect.left / window.innerWidth, y: rect.top / window.innerHeight }
+                });
+
+                // Update scoreboard
+                popScore++;
+                document.getElementById('popScore').textContent = popScore;
+
+                balloon.remove();
+            });
+
+            // Auto removal after animation ends
+            balloon.addEventListener('animationend', () => {
+                balloon.remove();
+            });
+
+            container.appendChild(balloon);
+        }
+
+        // Spawn starting set of balloons
+        function spawnBalloonBatch() {
+            for (let i = 0; i < 8; i++) {
+                setTimeout(createBalloon, i * 250);
+            }
+        }
+
+        // Slideshow Carousel Logic
+        let activeWish = 0;
+        const totalWishes = 3;
+
+        function updateSlider() {
+            for (let i = 0; i < totalWishes; i++) {
+                const card = document.getElementById(`wish-card-${i}`);
+                const dot = document.getElementById(`dot-${i}`);
+                if (i === activeWish) {
+                    card.classList.remove('hidden');
+                    dot.classList.add('bg-purple-600');
+                    dot.classList.remove('bg-purple-300');
+                } else {
+                    card.classList.add('hidden');
+                    dot.classList.remove('bg-purple-600');
+                    dot.classList.add('bg-purple-300');
+                }
+            }
+        }
+
+        function nextWish() {
+            activeWish = (activeWish + 1) % totalWishes;
+            updateSlider();
+            playTone(500, 0.05, "sine");
+        }
+
+        function prevWish() {
+            activeWish = (activeWish - 1 + totalWishes) % totalWishes;
+            updateSlider();
+            playTone(500, 0.05, "sine");
+        }
+
+        // Build dots dynamically
+        const dotsContainer = document.getElementById('dots-container');
+        for (let i = 0; i < totalWishes; i++) {
+            const dot = document.createElement('button');
+            dot.id = `dot-${i}`;
+            dot.className = 'w-3 h-3 rounded-full transition-colors duration-300 bg-purple-300';
+            dot.addEventListener('click', () => {
+                activeWish = i;
+                updateSlider();
+            });
+            dotsContainer.appendChild(dot);
+        }
+
+        // Write Custom Wish
+        function renderCustomWish() {
+            const text = document.getElementById('customWishText').value.trim();
+            if (text === "") return;
+
+            const poster = document.getElementById('posterBox');
+            const posterContent = document.getElementById('posterWishContent');
+            
+            posterContent.textContent = text;
+            poster.classList.remove('hidden');
+            
+            // Scroll to poster smoothly
+            poster.scrollIntoView({ behavior: 'smooth' });
+            
+            // Fun celebratory burst
+            shootHugeConfetti();
+        }
+
+        function triggerEntrySparkles() {
+            const duration = 3.5 * 1000;
+            const animationEnd = Date.now() + duration;
+            const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 100 };
+
+            function randomInRange(min, max) {
+                return Math.random() * (max - min) + min;
+            }
+
+            const interval = setInterval(function() {
+                const timeLeft = animationEnd - Date.now();
+
+                if (timeLeft <= 0) {
+                    return clearInterval(interval);
+                }
+
+                const particleCount = 50 * (timeLeft / duration);
+                // Magical colors for the sparkles
+                const colors = ['#ffffff', '#fde047', '#fbcfe8', '#c084fc'];
+
+                myConfetti(Object.assign({}, defaults, { 
+                    particleCount, 
+                    origin: { x: randomInRange(0.1, 0.9), y: Math.random() - 0.2 },
+                    colors: colors,
+                    shapes: ['star', 'circle'],
+                    scalar: randomInRange(0.5, 1.2)
+                }));
+            }, 250);
+        }
+
+        // On Load initialization
+        window.onload = function() {
+            updateSlider();
+            
+            // Trigger magical sparkles on entry!
+            triggerEntrySparkles();
+
+            // Start releasing some balloons immediately
+            spawnBalloonBatch();
+            // Periodically float balloons to keep background active
+            setInterval(createBalloon, 3500);
+        };
+    </script>
+</body>
+</html>
